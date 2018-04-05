@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordPartyBot.Database;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -12,12 +14,19 @@ namespace DiscordPartyBot
         private DiscordSocketClient _client;
         private CommandService _commandService;
         private string _token;
+        //private IServiceProvider _services;
 
         public PartyBot(string token, Func<LogMessage, Task> logHandler)
         {
             _token = token;
             _client = new DiscordSocketClient();
             _commandService = new CommandService();
+            //_services = new ServiceCollection()
+            //    .AddSingleton(_client)
+            //    .AddSingleton(_commandService)
+            //    .AddSingleton<IDatabaseService>(new InMemoryDatabaseService())
+            //    .BuildServiceProvider();
+
             _client.Log += logHandler;
             _client.MessageReceived += MessageReceived;
         }
@@ -41,8 +50,15 @@ namespace DiscordPartyBot
             int argPos = 0;
             if (userMessage != null && userMessage.HasCharPrefix('!', ref argPos))
             {
-                var ctx = new SocketCommandContext(_client, userMessage);
-                await _commandService.ExecuteAsync(ctx, argPos);
+                try
+                {
+                    var ctx = new SocketCommandContext(_client, userMessage);
+                    await _commandService.ExecuteAsync(ctx, argPos);
+                }
+                catch(Exception ex)
+                {
+
+                }
             }
         }
 
