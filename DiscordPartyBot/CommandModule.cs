@@ -20,7 +20,11 @@ namespace DiscordPartyBot.Modules
         [Command("godota")]
         public async Task GoParty(params string[] date)
         {
-            if(date.Length != 0)
+            if (Context.User.IsBot)
+            {
+                return;
+            }
+            else if(date.Length != 0)
             {
                 var creator = Context.User.Username;
                 var joinedDate = string.Join(" ", date);
@@ -87,9 +91,30 @@ namespace DiscordPartyBot.Modules
             await Context.Channel.SendMessageAsync(messageBuilder.ToString());
         }
 
+        [Command("help")]
+        public async Task Help()
+        {
+            var strBuilder = new StringBuilder();
+
+            strBuilder.AppendLine("`!godota :comment:`");
+            strBuilder.AppendLine("Например: `!godota Сегодня в 8 вечера`");
+            strBuilder.AppendLine();
+            strBuilder.AppendLine("`!go :partyId:`");
+            strBuilder.AppendLine("Например: `!go 69`");
+            strBuilder.AppendLine("Чтобы узнать partyId напиши `!list`");
+            strBuilder.AppendLine();
+            strBuilder.AppendLine("`!list`");
+            strBuilder.AppendLine();
+            strBuilder.AppendLine("`!show :partyId:`");
+            strBuilder.AppendLine("Например: `!show 69`");
+
+            await Context.Channel.SendMessageAsync(strBuilder.ToString());
+        }
+
         private string _GetPartyStringView(Party party)
         {
             var strBuilder = new StringBuilder();
+            strBuilder.AppendLine($"PartId: {party.Id}");
             strBuilder.AppendLine($"Дотка начинаецца: {party.Date}");
             strBuilder.AppendLine("Зарегистрированные бойцы:");
             foreach (var member in party.Users)
