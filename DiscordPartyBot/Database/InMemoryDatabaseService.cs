@@ -40,6 +40,13 @@ namespace DiscordPartyBot.Database
             return newParty.Id;
         }
 
+        public IEnumerable<Party> GetAllParties()
+        {
+            var parties = _parties;
+
+            return parties;
+        }
+
         public Party GetPartyById(int partyId)
         {
             return _parties.SingleOrDefault(p => p.Id == partyId);

@@ -1,5 +1,6 @@
 ﻿using Discord.Commands;
 using DiscordPartyBot.Database;
+using DiscordPartyBot.Model;
 using System;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace DiscordPartyBot.Modules
 {
     public class CommandModule : ModuleBase<SocketCommandContext>
     {
-        private IDatabaseService _dbService = new InMemoryDatabaseService();
+        private IDatabaseService _dbService;// = new InMemoryDatabaseService();
 
         public CommandModule()
         {
@@ -55,20 +56,48 @@ namespace DiscordPartyBot.Modules
             var party = _dbService.GetPartyById(partyId);
             if(party != null)
             {
-                var strBuilder = new StringBuilder();
-                strBuilder.AppendLine($"Дотка начинаецца: {party.Date}");
-                strBuilder.AppendLine("Зарегистрированные бойцы:");
-                foreach(var member in party.Users)
-                {
-                    strBuilder.AppendLine(member);
-                }
+                var partyStringView = _GetPartyStringView(party);
 
-                await Context.Channel.SendMessageAsync(strBuilder.ToString());
+                await Context.Channel.SendMessageAsync(partyStringView);
             }
             else
             {
                 await Context.Channel.SendMessageAsync($"Пати с id {partyId} не существует");
             }
+        }
+
+        [Command("list")]
+        public async Task List()
+        {
+            var parties = _dbService.GetAllParties();
+
+            var messageBuilder = new StringBuilder();
+            if (!parties.Any())
+            {
+                messageBuilder.Append("No parties are coming");
+            }
+            foreach (var party in parties)
+            {
+                var partyStringView = _GetPartyStringView(party);
+
+                messageBuilder.Append(partyStringView);
+                messageBuilder.AppendLine();
+            }
+
+            await Context.Channel.SendMessageAsync(messageBuilder.ToString());
+        }
+
+        private string _GetPartyStringView(Party party)
+        {
+            var strBuilder = new StringBuilder();
+            strBuilder.AppendLine($"Дотка начинаецца: {party.Date}");
+            strBuilder.AppendLine("Зарегистрированные бойцы:");
+            foreach (var member in party.Users)
+            {
+                strBuilder.AppendLine(member);
+            }
+
+            return strBuilder.ToString();
         }
     }
 }

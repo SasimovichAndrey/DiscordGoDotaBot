@@ -14,20 +14,16 @@ namespace DiscordPartyBot
         private DiscordSocketClient _client;
         private CommandService _commandService;
         private string _token;
-        //private IServiceProvider _services;
+        private Func<LogMessage, Task> _log;
 
         public PartyBot(string token, Func<LogMessage, Task> logHandler)
         {
             _token = token;
             _client = new DiscordSocketClient();
             _commandService = new CommandService();
-            //_services = new ServiceCollection()
-            //    .AddSingleton(_client)
-            //    .AddSingleton(_commandService)
-            //    .AddSingleton<IDatabaseService>(new InMemoryDatabaseService())
-            //    .BuildServiceProvider();
 
             _client.Log += logHandler;
+            _log = logHandler;
             _client.MessageReceived += MessageReceived;
         }
 
@@ -57,7 +53,7 @@ namespace DiscordPartyBot
                 }
                 catch(Exception ex)
                 {
-
+                    await _log(new LogMessage(LogSeverity.Warning, "Source?", "Exception has been caught during MessageReceived handler execution"));
                 }
             }
         }
